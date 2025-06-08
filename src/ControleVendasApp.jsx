@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectItem } from "@/components/ui/select";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Plus, Trash } from 'lucide-react';
+import { db } from "./firebase.js";
+import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } from "firebase/firestore";
 
 export default function ControleVendasApp() {
   const [produto, setProduto] = useState('');
@@ -13,33 +15,51 @@ export default function ControleVendasApp() {
   const [pagamento, setPagamento] = useState('pix');
   const [vendas, setVendas] = useState([]);
 
-  function adicionarVenda() {
+  // Carrega vendas do Firestore e atualiza em tempo real
+  useEffect(() => {
+    const q = query(collection(db, "vendas"), orderBy("timestamp", "asc"));
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const dados = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setVendas(dados);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Adiciona nova venda ao Firestore
+  async function adicionarVenda() {
     if (!produto || !preco || !quantidade) return;
-    const novaVenda = {
-      id: Date.now(),
+    await addDoc(collection(db, "vendas"), {
       produto,
       preco: parseFloat(preco),
       quantidade: parseInt(quantidade, 10),
       pagamento,
-      total: parseFloat(preco) * parseInt(quantidade, 10)
-    };
-    setVendas(prev => [...prev, novaVenda]);
+      total: parseFloat(preco) * parseInt(quantidade, 10),
+      timestamp: serverTimestamp()
+    });
     setProduto('');
     setPreco('');
     setQuantidade('');
   }
 
-  function removerVenda(id) {
-    setVendas(prev => prev.filter(v => v.id !== id));
+  // Remove venda do Firestore
+  async function removerVenda(id) {
+    await deleteDoc(doc(db, "vendas", id));
   }
 
-  const totalGeral = vendas.reduce((sum, v) => sum + v.total, 0);
+  const totalGeral = vendas.reduce((sum, v) => sum + (v.total || 0), 0);
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
+      {/* Logo no topo */}
+      <div className="flex justify-center mb-6">
+        <img src="/src/assets/logo.png" alt="Logo Mundo Nerd" className="h-[60px] w-auto object-contain" />
+      </div>
+
+      {/* Container branco principal */}
       <div className="max-w-3xl mx-auto bg-white rounded-xl p-6 shadow-lg space-y-6">
         <h1 className="text-3xl font-bold text-center">🤑 Controle de Vendas 🚀</h1>
 
+        {/* Formulário de nova venda */}
         <Card>
           <CardContent className="p-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
@@ -58,6 +78,7 @@ export default function ControleVendasApp() {
           </CardContent>
         </Card>
 
+        {/* Tabela de vendas */}
         <Card>
           <CardContent className="p-4 overflow-x-auto">
             <Table>

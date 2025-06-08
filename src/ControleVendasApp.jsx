@@ -52,7 +52,7 @@ export default function ControleVendasApp() {
     <div className="min-h-screen bg-gray-100 p-4">
       {/* Logo no topo */}
       <div className="flex justify-center mb-6">
-        <img src="/src/assets/logo.png" alt="Logo Mundo Nerd" className="h-[60px] w-auto object-contain" />
+        <img src={logo} alt="Logo Mundo Nerd" className="h-[60px] w-auto object-contain" />
       </div>
 
       {/* Container branco principal */}

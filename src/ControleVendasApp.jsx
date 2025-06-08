@@ -51,8 +51,8 @@ export default function ControleVendasApp() {
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       {/* Logo no topo */}
-      <div className="flex justify-center mb-6">
-        <img src={logo} alt="Logo Mundo Nerd" className="h-[60px] w-auto object-contain" />
+     <div className="flex justify-center mb-4">
+        <img src={logo} alt="Logo Mundo Nerd" className="h-[60px] w-auto max-w-[160px] object-contain" />
       </div>
 
       {/* Container branco principal */}

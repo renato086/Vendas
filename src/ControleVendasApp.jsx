@@ -46,7 +46,7 @@ export default function ControleVendasApp() {
               <Input placeholder="Produto" value={produto} onChange={e => setProduto(e.target.value)} className="w-full" />
               <Input placeholder="Preço" type="number" value={preco} onChange={e => setPreco(e.target.value)} className="w-full" />
               <Input placeholder="Quantidade" type="number" value={quantidade} onChange={e => setQuantidade(e.target.value)} className="w-full" />
-              <Select value={pagamento} onValueChange={setPagamento} className="w-full">
+              <Select value={pagamento} onChange={e => setPagamento(e.target.value)} className="w-full">
                 <SelectItem value="pix">Pix</SelectItem>
                 <SelectItem value="dinheiro">Dinheiro</SelectItem>
                 <SelectItem value="cartao">Cartão</SelectItem>

@@ -58,7 +58,7 @@ export default function ControleVendasApp() {
 
       {/* Container branco principal */}
       <div className="max-w-3xl mx-auto bg-white rounded-xl p-6 shadow-lg space-y-6">
-        <h1 className="text-3xl font-bold text-center">🤑 Controle de Vendas 🚀</h1>
+        <h1 className="text-2xl font-bold text-center">🤑 Controle de Vendas 🚀</h1>
 
         {/* Formulário de nova venda */}
         <Card>

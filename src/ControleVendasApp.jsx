@@ -7,29 +7,38 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Plus, Trash } from 'lucide-react';
 import logo from "@/assets/logo.png";
 import { db } from "./firebase.js";
-import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, doc, onSnapshot, query, where, orderBy, serverTimestamp } from "firebase/firestore";
+
+// Opções de feira
+const feiraOptions = ["CAF", "NIPO"];
 
 export default function ControleVendasApp() {
+  const [feira, setFeira] = useState(feiraOptions[0]);
   const [produto, setProduto] = useState('');
   const [preco, setPreco] = useState('');
   const [quantidade, setQuantidade] = useState('');
   const [pagamento, setPagamento] = useState('pix');
   const [vendas, setVendas] = useState([]);
 
-  // Carrega vendas do Firestore e atualiza em tempo real
+  // Carrega vendas do Firestore filtrando pela feira
   useEffect(() => {
-    const q = query(collection(db, "vendas"), orderBy("timestamp", "asc"));
+    const q = query(
+      collection(db, "vendas"),
+      where("feira", "==", feira),
+      orderBy("timestamp", "asc")
+    );
     const unsubscribe = onSnapshot(q, snapshot => {
       const dados = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setVendas(dados);
     });
     return () => unsubscribe();
-  }, []);
+  }, [feira]);
 
-  // Adiciona nova venda ao Firestore
+  // Adiciona nova venda com indicação de feira
   async function adicionarVenda() {
     if (!produto || !preco || !quantidade) return;
     await addDoc(collection(db, "vendas"), {
+      feira,
       produto,
       preco: parseFloat(preco),
       quantidade: parseInt(quantidade, 10),
@@ -42,32 +51,38 @@ export default function ControleVendasApp() {
     setQuantidade('');
   }
 
-  // Remove venda do Firestore
+  // Remove venda
   async function removerVenda(id) {
     await deleteDoc(doc(db, "vendas", id));
   }
 
+  // Soma total geral
   const totalGeral = vendas.reduce((sum, v) => sum + (v.total || 0), 0);
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
-      {/* Logo no topo */}
-     <div className="flex justify-center mb-4">
+      {/* Logo e seleção de feira */}
+      <div className="flex flex-col items-center mb-4 space-y-2">
         <img src={logo} alt="Logo Mundo Nerd" className="h-[60px] w-auto max-w-[160px] object-contain" />
+        <Select value={feira} onValueChange={setFeira} className="w-full max-w-xs">
+          {feiraOptions.map(f => (
+            <SelectItem key={f} value={f}>{f}</SelectItem>
+          ))}
+        </Select>
       </div>
 
       {/* Container branco principal */}
       <div className="max-w-3xl mx-auto bg-white rounded-xl p-6 shadow-lg space-y-6">
         <h1 className="text-2xl font-bold text-center">🤑 Controle de Vendas 🚀</h1>
 
-        {/* Formulário de nova venda */}
+        {/* Formulário de Vendas */}
         <Card>
           <CardContent className="p-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
               <Input placeholder="Produto" value={produto} onChange={e => setProduto(e.target.value)} className="w-full" />
               <Input placeholder="Preço" type="number" value={preco} onChange={e => setPreco(e.target.value)} className="w-full" />
               <Input placeholder="Quantidade" type="number" value={quantidade} onChange={e => setQuantidade(e.target.value)} className="w-full" />
-              <Select value={pagamento} onChange={e => setPagamento(e.target.value)} className="w-full">
+              <Select value={pagamento} onValueChange={setPagamento} className="w-full">
                 <SelectItem value="pix">Pix</SelectItem>
                 <SelectItem value="dinheiro">Dinheiro</SelectItem>
                 <SelectItem value="cartao">Cartão</SelectItem>
@@ -79,7 +94,7 @@ export default function ControleVendasApp() {
           </CardContent>
         </Card>
 
-        {/* Tabela de vendas */}
+        {/* Tabela de Vendas */}
         <Card>
           <CardContent className="p-4 overflow-x-auto">
             <Table>
@@ -117,7 +132,7 @@ export default function ControleVendasApp() {
                 )}
               </TableBody>
             </Table>
-            <div className="text-right mt-4 font-bold text-xl">
+            <div className="text-right mt-4 font-bold text-lg">
               Total Geral: R$ {totalGeral.toFixed(2)}
             </div>
           </CardContent>

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectItem } from "@/components/ui/select";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Plus, Trash } from 'lucide-react';
 import logo from "@/assets/logo.png";
@@ -64,11 +63,15 @@ export default function ControleVendasApp() {
       {/* Logo e seleção de feira */}
       <div className="flex flex-col items-center mb-4 space-y-2">
         <img src={logo} alt="Logo Mundo Nerd" className="h-[60px] w-auto max-w-[160px] object-contain" />
-        <Select value={feira} onValueChange={setFeira} className="w-full max-w-xs">
+        <select
+          value={feira}
+          onChange={e => setFeira(e.target.value)}
+          className="border rounded px-2 py-1 w-full max-w-xs"
+        >
           {feiraOptions.map(f => (
-            <SelectItem key={f} value={f}>{f}</SelectItem>
+            <option key={f} value={f}>{f}</option>
           ))}
-        </Select>
+        </select>
       </div>
 
       {/* Container branco principal */}
@@ -82,11 +85,15 @@ export default function ControleVendasApp() {
               <Input placeholder="Produto" value={produto} onChange={e => setProduto(e.target.value)} className="w-full" />
               <Input placeholder="Preço" type="number" value={preco} onChange={e => setPreco(e.target.value)} className="w-full" />
               <Input placeholder="Quantidade" type="number" value={quantidade} onChange={e => setQuantidade(e.target.value)} className="w-full" />
-              <Select value={pagamento} onValueChange={setPagamento} className="w-full">
-                <SelectItem value="pix">Pix</SelectItem>
-                <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                <SelectItem value="cartao">Cartão</SelectItem>
-              </Select>
+              <select
+                value={pagamento}
+                onChange={e => setPagamento(e.target.value)}
+                className="border rounded px-2 py-1 w-full"
+              >
+                <option value="pix">Pix</option>
+                <option value="dinheiro">Dinheiro</option>
+                <option value="cartao">Cartão</option>
+              </select>
               <Button onClick={adicionarVenda} className="flex items-center justify-center">
                 <Plus className="w-4 h-4 mr-1" />Adicionar
               </Button>

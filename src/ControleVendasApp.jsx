@@ -9,7 +9,7 @@ import { db } from "./firebase.js";
 import { collection, addDoc, deleteDoc, doc, onSnapshot, serverTimestamp } from "firebase/firestore";
 
 // Opções de feira
-const feiraOptions = ["CAF", "NIPO"];
+const feiraOptions = ["CAF", "NIPO", "SHOP"];
 
 export default function ControleVendasApp() {
   const [feira, setFeira] = useState(feiraOptions[0]);

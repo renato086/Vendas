@@ -6,7 +6,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Plus, Trash } from 'lucide-react';
 import logo from "@/assets/logo.png";
 import { db } from "./firebase.js";
-import { collection, addDoc, deleteDoc, doc, onSnapshot, query, where, orderBy, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, doc, onSnapshot, serverTimestamp } from "firebase/firestore";
 
 // Opções de feira
 const feiraOptions = ["CAF", "NIPO"];
@@ -19,16 +19,14 @@ export default function ControleVendasApp() {
   const [pagamento, setPagamento] = useState('pix');
   const [vendas, setVendas] = useState([]);
 
-  // Carrega vendas do Firestore filtrando pela feira
+  // Carrega todas as vendas e filtra/localiza conforme feira, ordenando por timestamp
   useEffect(() => {
-    const q = query(
-      collection(db, "vendas"),
-      where("feira", "==", feira),
-      orderBy("timestamp", "asc")
-    );
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const dados = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setVendas(dados);
+    const unsubscribe = onSnapshot(collection(db, "vendas"), snapshot => {
+      const all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const filtered = all
+        .filter(v => v.feira === feira)
+        .sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+      setVendas(filtered);
     });
     return () => unsubscribe();
   }, [feira]);
@@ -45,6 +43,7 @@ export default function ControleVendasApp() {
       total: parseFloat(preco) * parseInt(quantidade, 10),
       timestamp: serverTimestamp()
     });
+    // Reset campos
     setProduto('');
     setPreco('');
     setQuantidade('');
